@@ -1,0 +1,67 @@
+import random
+
+# Define a function to choose a random word from a list
+def choose_word(word_list):
+    return random.choice(word_list)
+
+# Define a function to initialize the game state
+def initialize_game(word):
+    word_length = len(word)
+    return {'word': word, 'display': '_' * word_length, 'guesses': set(), 'misses': set(), 'max_misses': 6}
+
+# Define a function to update the game state after a guess
+def update_game_state(game_state, guess):
+    if guess in game_state['guesses']:
+        print("You've already guessed that letter!")
+    elif guess in game_state['word']:
+        for i in range(len(game_state['word'])):
+            if game_state['word'][i] == guess:
+                game_state['display'] = game_state['display'][:i] + guess + game_state['display'][i+1:]
+        game_state['guesses'].add(guess)
+    else:
+        game_state['misses'].add(guess)
+        game_state['max_misses'] -= 1
+        game_state['guesses'].add(guess)
+        print(f"Sorry, {guess} is not in the word.")
+    
+    return game_state
+
+# Define a function to display the game state
+def display_game_state(game_state):
+    print(f"Word: {game_state['display']}")
+    print(f"Misses: {', '.join(sorted(list(game_state['misses'])))}")
+    print(f"Guesses remaining: {game_state['max_misses']}")
+    
+# Define a function to check if the game is over
+def check_game_over(game_state):
+    if game_state['max_misses'] == 0:
+        print(f"Sorry, you lost! The word was {game_state['word']}.")
+        return True
+    elif '_' not in game_state['display']:
+        print("Congratulations, you won!")
+        return True
+    else:
+        return False
+
+# Define a function to play the game
+def play_game(word_list):
+    word = choose_word(word_list)
+    game_state = initialize_game(word)
+    
+    while not check_game_over(game_state):
+        display_game_state(game_state)
+        guess = input("Enter a letter: ").lower()
+        game_state = update_game_state(game_state, guess)
+    
+    play_again = input("Would you like to play again? (y/n) ").lower()
+    if play_again == 'y':
+        play_game(word_list)
+    else:
+        print("Thanks for playing!")
+
+# Load a list of words from a file
+with open('words.txt') as f:
+    word_list = f.read().splitlines()
+
+# Play the game
+play_game(word_list)
